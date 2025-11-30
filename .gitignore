@@ -1,0 +1,25 @@
+# 编译产物
+**/x64/
+**/Debug/
+**/Release/
+**/*.obj
+**/*.pdb
+**/*.exe
+**/*.dll
+**/*.lib
+**/*.log
+
+# Visual Studio
+**/.vs/
+**/*.vcxproj.user
+**/*.sdf
+**/*.suo
+
+# Node.js
+**/node_modules/
+**/package-lock.json
+
+
+# 其他
+**/.DS_Store
+**/Thumbs.db
