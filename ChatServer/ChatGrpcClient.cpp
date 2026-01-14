@@ -12,11 +12,12 @@ ChatGrpcClient::ChatGrpcClient()
 	auto server_list = cfg["PeerServer"]["Servers"];
 
 	std::vector<std::string> words;
-
-	std::stringstream ss(server_list);
+	
+	// server_list 是一个由服务器地址组成的字符串（例如 "server1,server2,server3"）
+	std::stringstream ss(server_list); 
 	std::string word;
 
-	while (std::getline(ss, word, ',')) {
+	while (std::getline(ss, word, ',')) { // std::getline 是一个用于从输入流中读取一行数据的函数
 		words.push_back(word);
 	}
 
@@ -31,27 +32,27 @@ ChatGrpcClient::ChatGrpcClient()
 
 AddFriendRsp ChatGrpcClient::NotifyAddFriend(std::string server_ip, const AddFriendReq& req)
 {
-	AddFriendRsp rsp;
+	AddFriendRsp rsp; // 返回的响应对象
 	Defer defer([&rsp, &req]() {
-		rsp.set_error(ErrorCodes::Success);
-		rsp.set_applyuid(req.applyuid());
-		rsp.set_touid(req.touid());
+		rsp.set_error(ErrorCodes::Success); // 设置响应的错误码为成功
+		rsp.set_applyuid(req.applyuid()); // 设置申请用户ID
+		rsp.set_touid(req.touid()); // 设置目标用户ID
 		});
 
-	auto find_iter = _pools.find(server_ip);
-	if (find_iter == _pools.end()) {
-		return rsp;
+	auto find_iter = _pools.find(server_ip); // 在连接池中查找对应的服务器IP
+	if (find_iter == _pools.end()) { // 如果没有找到对应的连接池
+		return rsp; // 直接返回响应对象
 	}
 	
-	auto &pool = find_iter->second;
-	ClientContext context;
-	auto stub = pool->getConnection();
-	Status status = stub->NotifyAddFriend(&context, req, &rsp);
-	Defer defercon([&stub, this, &pool]() {
+	auto& pool = find_iter->second; // 获取对应的连接池
+	ClientContext context; // 创建 gRPC 客户端上下文
+	auto stub = pool->getConnection(); // 从连接池中获取一个连接
+	Status status = stub->NotifyAddFriend(&context, req, &rsp); // 通过 gRPC 调用远程方法
+	Defer defercon([&stub, this, &pool]() { // 定义一个延迟执行的操作，用于归还连接
 		pool->returnConnection(std::move(stub));
 		});
 
-	if (!status.ok()) {
+	if (!status.ok()) { // 如果 gRPC 调用失败
 		rsp.set_error(ErrorCodes::RPCFailed);
 		return rsp;
 	}
@@ -62,9 +63,9 @@ AddFriendRsp ChatGrpcClient::NotifyAddFriend(std::string server_ip, const AddFri
 
 bool ChatGrpcClient::GetBaseInfo(std::string base_key, int uid, std::shared_ptr<UserInfo>& userinfo)
 {
-	//���Ȳ�redis�в�ѯ�û���Ϣ
+	//优先查redis中查询用户信息
 	std::string info_str = "";
-	bool b_base = RedisMgr::GetInstance()->Get(base_key, info_str);
+	bool b_base = RedisMgr::GetInstance()->Get(base_key, info_str); //从redis中获取用户信息
 	if (b_base) {
 		Json::Reader reader;
 		Json::Value root;
@@ -81,8 +82,8 @@ bool ChatGrpcClient::GetBaseInfo(std::string base_key, int uid, std::shared_ptr<
 			<< userinfo->name << " pwd is " << userinfo->pwd << " email is " << userinfo->email << endl;
 	}
 	else {
-		//redis��û�����ѯmysql
-		//��ѯ���ݿ�
+		//redis中没有则查询mysql
+		//查询数据库
 		std::shared_ptr<UserInfo> user_info = nullptr;
 		user_info = MysqlMgr::GetInstance()->GetUser(uid);
 		if (user_info == nullptr) {
@@ -91,7 +92,7 @@ bool ChatGrpcClient::GetBaseInfo(std::string base_key, int uid, std::shared_ptr<
 
 		userinfo = user_info;
 
-		//�����ݿ�����д��redis����
+		//将数据库内容写入redis缓存
 		Json::Value redis_root;
 		redis_root["uid"] = uid;
 		redis_root["pwd"] = userinfo->pwd;
@@ -103,11 +104,10 @@ bool ChatGrpcClient::GetBaseInfo(std::string base_key, int uid, std::shared_ptr<
 		redis_root["icon"] = userinfo->icon;
 		RedisMgr::GetInstance()->Set(base_key, redis_root.toStyledString());
 	}
-
 }
 
 AuthFriendRsp ChatGrpcClient::NotifyAuthFriend(std::string server_ip, const AuthFriendReq& req) {
-	AuthFriendRsp rsp;
+	AuthFriendRsp rsp; 
 	rsp.set_error(ErrorCodes::Success);
 
 	Defer defer([&rsp, &req]() {

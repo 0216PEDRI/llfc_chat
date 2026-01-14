@@ -182,6 +182,9 @@ public:
 
         retranslateUi(ChatDialog);
 
+        stackedWidget->setCurrentIndex(2);
+
+
         QMetaObject::connectSlotsByName(ChatDialog);
     } // setupUi
 

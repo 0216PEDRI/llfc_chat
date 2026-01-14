@@ -73,20 +73,20 @@ void ApplyFriend::InitTipLbs()
 
         if (_tip_cur_point.x() + textWidth + tip_offset > ui->lb_list->width()) {
             lines++;
-            if (lines > 2) {
+            if (lines > 2) { // 如果已经超过两行，则删除当前标签并退出
                 delete lb;
-                return;
+                return;  // 结束函数，停止添加新的标签
             }
 
             _tip_cur_point.setX(tip_offset);
             _tip_cur_point.setY(_tip_cur_point.y() + textHeight + 15);
 
         }
-
+        // 更新下一个标签的位置
         auto next_point = _tip_cur_point;
-
+        // 将标签添加到界面
         AddTipLbs(lb, _tip_cur_point,next_point, textWidth, textHeight);
-
+        // 更新当前标签的位置，为下一个标签的计算做好准备
         _tip_cur_point = next_point;
     }
 
@@ -94,7 +94,7 @@ void ApplyFriend::InitTipLbs()
 
 void ApplyFriend::AddTipLbs(ClickedLabel* lb, QPoint cur_point, QPoint& next_point, int text_width, int text_height)
 {
-    lb->move(cur_point);
+    lb->move(cur_point);// 将标签移到指定的坐标位置 (cur_point)
     lb->show();
     _add_labels.insert(lb->text(), lb);
     _add_label_keys.push_back(lb->text());
@@ -127,41 +127,44 @@ void ApplyFriend::SetSearchInfo(std::shared_ptr<SearchInfo> si)
 void ApplyFriend::ShowMoreLabel()
 {
     qDebug()<< "receive more label clicked";
-    ui->more_lb_wid->hide();
+    ui->more_lb_wid->hide();  // 隐藏“更多标签”按钮
 
     ui->lb_list->setFixedWidth(325);
     _tip_cur_point = QPoint(5, 5);
     auto next_point = _tip_cur_point;
     int textWidth;
     int textHeight;
-    //重拍现有的label
+
+    // 遍历已添加的标签，重新布局
     for(auto & added_key : _add_label_keys){
-        auto added_lb = _add_labels[added_key];
+        auto added_lb = _add_labels[added_key]; // 获取已添加的标签
 
         QFontMetrics fontMetrics(added_lb->font()); // 获取QLabel控件的字体信息
         textWidth = fontMetrics.horizontalAdvance(added_lb->text()); // 获取文本的宽度
         textHeight = fontMetrics.height(); // 获取文本的高度
 
+        // 如果当前标签右侧会超出标签列表宽度，则换行
         if(_tip_cur_point.x() +textWidth + tip_offset > ui->lb_list->width()){
-            _tip_cur_point.setX(tip_offset);
-            _tip_cur_point.setY(_tip_cur_point.y()+textHeight+15);
+            _tip_cur_point.setX(tip_offset); // 重置横坐标为初始偏移
+            _tip_cur_point.setY(_tip_cur_point.y()+textHeight+15); // 换行，纵坐标增加文本高度和一定的间距
         }
-        added_lb->move(_tip_cur_point);
+        added_lb->move(_tip_cur_point);// 移动标签到新的位置
 
-        next_point.setX(added_lb->pos().x() + textWidth + 15);
-        next_point.setY(_tip_cur_point.y());
+        next_point.setX(added_lb->pos().x() + textWidth + 15);// 设置下一个标签的 x 坐标
+        next_point.setY(_tip_cur_point.y()); // 设置下一个标签的 y 坐标
 
-        _tip_cur_point = next_point;
+        _tip_cur_point = next_point; // 更新 _tip_cur_point 为下一个标签的坐标
 
     }
 
-    //添加未添加的
+    //添加未添加的标签
     for(int i = 0; i < _tip_data.size(); i++){
         auto iter = _add_labels.find(_tip_data[i]);
         if(iter != _add_labels.end()){
             continue;
         }
 
+        // 创建一个新的 ClickedLabel 标签
         auto* lb = new ClickedLabel(ui->lb_list);
         lb->SetState("normal", "hover", "pressed", "selected_normal",
                      "selected_hover", "selected_pressed");
@@ -174,7 +177,6 @@ void ApplyFriend::ShowMoreLabel()
         int textHeight = fontMetrics.height(); // 获取文本的高度
 
         if (_tip_cur_point.x() + textWidth + tip_offset > ui->lb_list->width()) {
-
             _tip_cur_point.setX(tip_offset);
             _tip_cur_point.setY(_tip_cur_point.y() + textHeight + 15);
 
@@ -233,18 +235,21 @@ void ApplyFriend::addLabel(QString name)
         return;
     }
 
+    // 创建一个新的 FriendLabel 对象，父控件为 gridWidget
     auto tmplabel = new FriendLabel(ui->gridWidget);
     tmplabel->SetText(name);
     tmplabel->setObjectName("FriendLabel");
 
     auto max_width = ui->gridWidget->width();
     //todo... 添加宽度统计
+
+     // 判断当前标签是否会超出 gridWidget 的宽度，如果超出则换行
     if (_label_point.x() + tmplabel->width() > max_width) {
         _label_point.setY(_label_point.y() + tmplabel->height() + 6);
         _label_point.setX(2);
     }
     else {
-
+        // 如果没有超出宽度，保持当前行，直接在当前行添加标签
     }
 
 
@@ -353,13 +358,14 @@ void ApplyFriend::SlotRemoveFriendLabel(QString name)
         }
     }
 
+    // 如果找到了标签的索引，则将其从 _friend_label_keys 中删除
     if(find_key != _friend_label_keys.end()){
         _friend_label_keys.erase(find_key);
     }
 
-
+    // 删除标签的内存
     delete find_iter.value();
-
+    // 从 _friend_labels 中删除该标签
     _friend_labels.erase(find_iter);
 
     resetLabels();
@@ -372,7 +378,7 @@ void ApplyFriend::SlotRemoveFriendLabel(QString name)
     find_add.value()->ResetNormalState();
 }
 
-//点击标已有签添加或删除新联系人的标签
+//点击标签添加或删除新联系人的标签
 void ApplyFriend::SlotChangeFriendLabelByTip(QString lbtext, ClickLbState state)
 {
     auto find_iter = _add_labels.find(lbtext);

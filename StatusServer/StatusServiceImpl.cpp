@@ -3,13 +3,14 @@
 #include "const.h"
 #include "RedisMgr.h"
 #include <climits>
+#include <vector>
 
-// Éú³ÉÒ»¸öÎ¨Ò» token
+// ç”Ÿæˆä¸€ä¸ªå”¯ä¸€ token
 std::string generate_unique_string() {
-	// ´´½¨UUID¶ÔÏó
+	// åˆ›å»ºUUIDå¯¹è±¡
 	boost::uuids::uuid uuid = boost::uuids::random_generator()();
 
-	// ½«UUID×ª»»Îª×Ö·û´®
+	// å°†UUIDè½¬æ¢ä¸ºå­—ç¬¦ä¸²
 	std::string unique_string = to_string(uuid);
 
 	return unique_string;
@@ -27,7 +28,7 @@ Status StatusServiceImpl::GetChatServer(ServerContext* context, const GetChatSer
 	return Status::OK;
 }
 
-// Æô¶¯Ê±¼ÓÔØËùÓĞ ChatServer ÅäÖÃ
+// å¯åŠ¨æ—¶åŠ è½½æ‰€æœ‰ ChatServer é…ç½®
 StatusServiceImpl::StatusServiceImpl()
 {
 	auto& cfg = ConfigMgr::Inst();
@@ -38,11 +39,11 @@ StatusServiceImpl::StatusServiceImpl()
 	std::stringstream ss(server_list);
 	std::string word;
 
-	while (std::getline(ss, word, ',')) { // std::getline(ss, word, ',')£º´Ó×Ö·û´®Á÷ssÖĞ¶ÁÈ¡×Ö·û£¬Ö±µ½Óöµ½·Ö¸ô·û,ÎªÖ¹(config.iniÎÄ¼şÖĞ¾ÍÓĞ£¬)£¬½«¶ÁÈ¡µÄÄÚÈİ´æÈëword£»
+	while (std::getline(ss, word, ',')) { // std::getline(ss, word, ',')ï¼šä»å­—ç¬¦ä¸²æµssä¸­è¯»å–å­—ç¬¦ï¼Œç›´åˆ°é‡åˆ°åˆ†éš”ç¬¦,ä¸ºæ­¢(config.iniæ–‡ä»¶ä¸­å°±æœ‰ï¼Œ)ï¼Œå°†è¯»å–çš„å†…å®¹å­˜å…¥wordï¼›
 		words.push_back(word);
 	}
 
-	for (auto& word : words) {  // ±éÀúÃ¿¸ö·şÎñÆ÷Ãû³Æ£¨chatserver1¡¢chatserver2£©
+	for (auto& word : words) {  // éå†æ¯ä¸ªæœåŠ¡å™¨åç§°ï¼ˆchatserver1ã€chatserver2ï¼‰
 		if (cfg[word]["Name"].empty()) {
 			continue;
 		}
@@ -58,41 +59,44 @@ StatusServiceImpl::StatusServiceImpl()
 
 ChatServer StatusServiceImpl::getChatServer() {
 	std::lock_guard<std::mutex> guard(_server_mtx);
-	auto minServer = _servers.begin()->second; // ³õÊ¼»¯×îĞ¡¸ºÔØ·şÎñÆ÷Îª·şÎñÆ÷ÁĞ±íÖĞµÄµÚÒ»¸ö·şÎñÆ÷
 	
-	// ´ÓRedisÖĞ»ñÈ¡³õÊ¼·şÎñÆ÷µÄµÇÂ¼Á¬½ÓÊı£¨HASH½á¹¹£ºLOGIN_COUNT¼ü£¬×Ö¶ÎÎª·şÎñÆ÷Ãû£©
-	auto count_str = RedisMgr::GetInstance()->HGet(LOGIN_COUNT, minServer.name);
-	if (count_str.empty()) {
-		//²»´æÔÚÄ¬ÈÏÉèÖÃÁ¬½ÓÊıÎª×î´óÖµ£¨±íÊ¾ÓÅÏÈ¼¶×îµÍ£©
-		minServer.con_count = INT_MAX;
-	}
-	else {
-		// ½«RedisÖĞ¶ÁÈ¡µÄ×Ö·û´®×ªÎªÕûÊı£¬¸³ÖµÎªµ±Ç°·şÎñÆ÷Á¬½ÓÊı
-		minServer.con_count = std::stoi(count_str);
-	}
-
-	// ±éÀúËùÓĞÁÄÌì·şÎñÆ÷£¬¶Ô±ÈÕÒµ½Á¬½ÓÊı×îÉÙµÄ·şÎñÆ÷
-	for ( auto& server : _servers) {
-		// Ìø¹ıÒÑ³õÊ¼»¯µÄµÚÒ»¸ö·şÎñÆ÷
-		if (server.second.name == minServer.name) {
-			continue;
-		}
-
-		auto count_str = RedisMgr::GetInstance()->HGet(LOGIN_COUNT, server.second.name);
-		if (count_str.empty()) {
-			server.second.con_count = INT_MAX;
-		}
-		else {
-			server.second.con_count = std::stoi(count_str);
-		}
+	// é¦–å…ˆæ”¶é›†æ‰€æœ‰å·²å¯åŠ¨çš„æœåŠ¡å™¨ï¼ˆåœ¨Redisä¸­æœ‰LOGIN_COUNTè®°å½•çš„æœåŠ¡å™¨ï¼‰
+	std::vector<ChatServer> available_servers;
+	
+	for (auto& server_pair : _servers) {
+		auto& server = server_pair.second;
+		auto count_str = RedisMgr::GetInstance()->HGet(LOGIN_COUNT, server.name);
 		
-		// Èôµ±Ç°·şÎñÆ÷Á¬½ÓÊıĞ¡ÓÚÒÑ¼ÇÂ¼µÄ×îĞ¡Á¬½ÓÊı£¬¸üĞÂ×îĞ¡¸ºÔØ·şÎñÆ÷
-		if (server.second.con_count < minServer.con_count) {
-			minServer = server.second;
+		// å¦‚æœRedisä¸­æœ‰è¯¥æœåŠ¡å™¨çš„è®°å½•ï¼Œè¯´æ˜æœåŠ¡å™¨å·²å¯åŠ¨
+		if (!count_str.empty()) {
+			server.con_count = std::stoi(count_str);
+			available_servers.push_back(server);
 		}
 	}
-
-	return minServer;  // ·µ»Ø¸ºÔØ×îµÍ£¨Á¬½ÓÊı×îÉÙ£©µÄÁÄÌì·şÎñÆ÷
+	
+	// å¦‚æœæ²¡æœ‰å·²å¯åŠ¨çš„æœåŠ¡å™¨ï¼Œè¿”å›é…ç½®ä¸­çš„ç¬¬ä¸€ä¸ªæœåŠ¡å™¨ï¼ˆè™½ç„¶å¯èƒ½è¿æ¥å¤±è´¥ï¼Œä½†è‡³å°‘ä¸ä¼šå´©æºƒï¼‰
+	if (available_servers.empty()) {
+		if (!_servers.empty()) {
+			return _servers.begin()->second;
+		}
+		// å¦‚æœé…ç½®ä¸­ä¹Ÿæ²¡æœ‰æœåŠ¡å™¨ï¼Œè¿”å›ä¸€ä¸ªç©ºæœåŠ¡å™¨
+		return ChatServer();
+	}
+	
+	// å¦‚æœåªæœ‰ä¸€ä¸ªå·²å¯åŠ¨çš„æœåŠ¡å™¨ï¼Œç›´æ¥è¿”å›
+	if (available_servers.size() == 1) {
+		return available_servers[0];
+	}
+	
+	// å¦‚æœæœ‰å¤šä¸ªå·²å¯åŠ¨çš„æœåŠ¡å™¨ï¼Œé€‰æ‹©è¿æ¥æ•°æœ€å°‘çš„
+	ChatServer minServer = available_servers[0];
+	for (size_t i = 1; i < available_servers.size(); ++i) {
+		if (available_servers[i].con_count < minServer.con_count) {
+			minServer = available_servers[i];
+		}
+	}
+	
+	return minServer;  // è¿”å›è´Ÿè½½æœ€ä½ï¼ˆè¿æ¥æ•°æœ€å°‘ï¼‰çš„èŠå¤©æœåŠ¡å™¨
 }
 
 Status StatusServiceImpl::Login(ServerContext* context, const LoginReq* request, LoginRsp* reply)
@@ -104,7 +108,7 @@ Status StatusServiceImpl::Login(ServerContext* context, const LoginReq* request,
 	std::string token_key = USERTOKENPREFIX + uid_str;
 	std::string token_value = "";
 	bool success = RedisMgr::GetInstance()->Get(token_key, token_value);
-	if (success) {
+	if (!success) {
 		reply->set_error(ErrorCodes::UidInvalid);
 		return Status::OK;
 	}
@@ -125,4 +129,3 @@ void StatusServiceImpl::insertToken(int uid, std::string token)
 	std::string token_key = USERTOKENPREFIX + uid_str;
 	RedisMgr::GetInstance()->Set(token_key, token);
 }
-

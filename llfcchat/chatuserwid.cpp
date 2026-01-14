@@ -67,12 +67,12 @@ void ChatUserWid::updateLastMsg(std::vector<std::shared_ptr<TextChatData>> msgs)
 
     QString last_msg = "";
     for (auto& msg : msgs) {
-        last_msg = msg->_msg_content;
-        _user_info->_chat_msgs.push_back(msg);
+        last_msg = msg->_msg_content; // 获取最后一条消息的内容
+        _user_info->_chat_msgs.push_back(msg);// 将消息存入用户的消息列表
     }
 
-    _user_info->_last_msg = last_msg;
-    ui->user_chat_lb->setText(_user_info->_last_msg);
+    _user_info->_last_msg = last_msg;// 更新最后一条消息
+    ui->user_chat_lb->setText(_user_info->_last_msg); // 显示最后一条消息
 }
 
 

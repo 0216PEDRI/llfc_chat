@@ -38,9 +38,10 @@ class ChatConPool {
 public:
 	ChatConPool(size_t poolSize, std::string host, std::string port)
 		: poolSize_(poolSize), host_(host), port_(port), b_stop_(false) {
+		// åˆå§‹åŒ–è¿æ¥æ± ï¼Œåˆ›å»º poolSize ä¸ª gRPC è¿æ¥ï¼ˆStubï¼‰å¹¶å­˜å…¥é˜Ÿåˆ—
 		for (size_t i = 0; i < poolSize_; ++i) {
 			std::shared_ptr<Channel> channel = grpc::CreateChannel(host + ":" + port, grpc::InsecureChannelCredentials());
-			connections_.push(ChatService::NewStub(channel)); // NewStubÏàµ±ÓÚ ÓÊµİÔ± ĞÅÊ¹
+			connections_.push(ChatService::NewStub(channel)); // NewStubç›¸å½“äº é‚®é€’å‘˜ ä¿¡ä½¿
 		}
 	}
 
@@ -54,19 +55,19 @@ public:
 
 	std::unique_ptr<ChatService::Stub> getConnection() {
 		std::unique_lock<std::mutex> lock(mutex_); 
-		// Ö»ÓĞµ±Õâ¸öÌõ¼ş±í´ïÊ½·µ»Ø true Ê±£¬Ïß³Ì²Å»á±»»½ĞÑ²¢¼ÌĞøÖ´ĞĞ£»·ñÔò£¬Ïß³Ì»áÒ»Ö±×èÈûµÈ´ı¡£
+		// åªæœ‰å½“è¿™ä¸ªæ¡ä»¶è¡¨è¾¾å¼è¿”å› true æ—¶ï¼Œçº¿ç¨‹æ‰ä¼šè¢«å”¤é†’å¹¶ç»§ç»­æ‰§è¡Œï¼›å¦åˆ™ï¼Œçº¿ç¨‹ä¼šä¸€ç›´é˜»å¡ç­‰å¾…ã€‚
 		cond_.wait(lock, [this] { 
 			if (b_stop_) {
-				return true; // Èç¹û b_stop_£¨Á¬½Ó³ØÍ£Ö¹±êÖ¾£©Îª true£¬·µ»Ø true ¡ú »½ĞÑÏß³Ì£¬ÍË³öµÈ´ı£¨´ËÊ±Òª·µ»Ø¿ÕÖ¸Õë£©¡£
+				return true; // å¦‚æœ b_stop_ï¼ˆè¿æ¥æ± åœæ­¢æ ‡å¿—ï¼‰ä¸º trueï¼Œè¿”å› true â†’ å”¤é†’çº¿ç¨‹ï¼Œé€€å‡ºç­‰å¾…ï¼ˆæ­¤æ—¶è¦è¿”å›ç©ºæŒ‡é’ˆï¼‰ã€‚
 			}
-			return !connections_.empty(); // Èç¹ûÁ¬½Ó³ØÎª¿Õ£¬connections_.empty()Îªtrue£¬»á×èÈûµÈ´ı
+			return !connections_.empty(); // å¦‚æœè¿æ¥æ± ä¸ºç©ºï¼Œconnections_.empty()ä¸ºtrueï¼Œ!connections_.empty()ä¸ºfalseï¼Œä¼šé˜»å¡ç­‰å¾…
 		});
 		
-		// Èç¹û±»»½ĞÑÊÇÒòÎª b_stop_ Îª true£¨Á¬½Ó³ØÒÑÍ£Ö¹£©£¬Ôò·µ»Ø¿ÕÖ¸Õë£¬¸æÖªµ÷ÓÃÕß ¡°ÎŞ·¨»ñÈ¡Á¬½Ó¡±¡£
+		// å¦‚æœè¢«å”¤é†’æ˜¯å› ä¸º b_stop_ ä¸º trueï¼ˆè¿æ¥æ± å·²åœæ­¢ï¼‰ï¼Œåˆ™è¿”å›ç©ºæŒ‡é’ˆï¼Œå‘ŠçŸ¥è°ƒç”¨è€… â€œæ— æ³•è·å–è¿æ¥â€ã€‚
 		if (b_stop_) {
 			return  nullptr;
 		} 
-		// ·ñÔò¾ÍÊÇÁ¬½Ó³Ø²»Îª¿Õ²¢ÇÒÃ»ÓĞÍ£Ö¹£¬È¡³öÁ¬½Ó²¢·µ»Ø
+		// å¦åˆ™å°±æ˜¯è¿æ¥æ± ä¸ä¸ºç©ºå¹¶ä¸”æ²¡æœ‰åœæ­¢ï¼Œå–å‡ºè¿æ¥å¹¶è¿”å›
 		auto context = std::move(connections_.front());
 		connections_.pop();
 		return context;
@@ -75,50 +76,47 @@ public:
 
 	void returnConnection(std::unique_ptr<ChatService::Stub> context) {
 		std::lock_guard<std::mutex> lock(mutex_); 
-		// 2. Èç¹ûÁ¬½Ó³ØÒÑÍ£Ö¹£¨b_stop_Îªtrue£©£¬Ôò²»¹é»¹£¨±ÜÃâÏòÒÑ¹Ø±ÕµÄ³ØÌí¼ÓÁ¬½Ó£©
+		// å¦‚æœè¿æ¥æ± å·²åœæ­¢ï¼ˆb_stop_ä¸ºtrueï¼‰ï¼Œåˆ™ä¸å½’è¿˜ï¼ˆé¿å…å‘å·²å…³é—­çš„æ± æ·»åŠ è¿æ¥ï¼‰
 		if (b_stop_) {
 			return;
 		}
-		// 3. ½«Á¬½Ó£¨Stub£©·Å»Ø¶ÓÁĞ£¨ÓÃstd::move×ªÒÆunique_ptrµÄËùÓĞÈ¨£¬ÒòÎª²»ÄÜ¸´ÖÆ£©
+		// å°†è¿æ¥ï¼ˆStubï¼‰æ”¾å›é˜Ÿåˆ—ï¼ˆç”¨std::moveè½¬ç§»unique_ptrçš„æ‰€æœ‰æƒï¼Œå› ä¸ºä¸èƒ½å¤åˆ¶ï¼‰
 		connections_.push(std::move(context)); 
-		// 4. »½ĞÑÒ»¸öÕıÔÚµÈ´ıÁ¬½ÓµÄÏß³Ì£¨µ÷ÓÃgetConnection()Ê±×èÈûµÄÏß³Ì£©
+		// å”¤é†’ä¸€ä¸ªæ­£åœ¨ç­‰å¾…è¿æ¥çš„çº¿ç¨‹ï¼ˆè°ƒç”¨getConnection()æ—¶é˜»å¡çš„çº¿ç¨‹ï¼‰
 		cond_.notify_one();
 	}
 
 	void Close() {
-		// 1. ±ê¼ÇÁ¬½Ó³ØÎª¡°Í£Ö¹¡±×´Ì¬
+		// 1. æ ‡è®°è¿æ¥æ± ä¸ºâ€œåœæ­¢â€çŠ¶æ€
 		b_stop_ = true;
 
-		// 2. »½ĞÑËùÓĞÒòµÈ´ıÁ¬½Ó¶ø×èÈûµÄÏß³Ì
+		// 2. å”¤é†’æ‰€æœ‰å› ç­‰å¾…è¿æ¥è€Œé˜»å¡çš„çº¿ç¨‹
 		cond_.notify_all();
 	}
 
 private:
-	atomic<bool> b_stop_;
-	size_t poolSize_;
-	std::string host_;
-	std::string port_;
-	std::queue<std::unique_ptr<ChatService::Stub> > connections_;
-	std::mutex mutex_;
-	std::condition_variable cond_;
+	atomic<bool> b_stop_; // è¿æ¥æ± åœæ­¢æ ‡å¿—
+	size_t poolSize_; // è¿æ¥æ± å¤§å°	
+	std::string host_; // æœåŠ¡å™¨ä¸»æœº
+	std::string port_; // æœåŠ¡å™¨ç«¯å£
+	std::queue<std::unique_ptr<ChatService::Stub> > connections_; // å­˜å‚¨grpcè¿æ¥çš„é˜Ÿåˆ—
+	std::mutex mutex_; // ä¿æŠ¤è¿æ¥é˜Ÿåˆ—çš„äº’æ–¥é”
+	std::condition_variable cond_; // æ¡ä»¶å˜é‡ï¼Œç”¨äºçº¿ç¨‹åŒæ­¥
 };
 
-// ÀûÓÃµ¥ÀıÄ£Ê½ÊµÏÖgrpcÍ¨ĞÅµÄ¿Í»§¶Ë
+// åˆ©ç”¨å•ä¾‹æ¨¡å¼å®ç°grpcé€šä¿¡çš„å®¢æˆ·ç«¯
 class ChatGrpcClient :public Singleton<ChatGrpcClient>
 {
 	friend class Singleton<ChatGrpcClient>;
 public:
 	~ChatGrpcClient() { }
 
-	AddFriendRsp NotifyAddFriend(std::string server_ip, const AddFriendReq& req);
-	AuthFriendRsp NotifyAuthFriend(std::string server_ip, const AuthFriendReq& req);
-	bool GetBaseInfo(std::string base_key, int uid, std::shared_ptr<UserInfo>& userinfo);
-	TextChatMsgRsp NotifyTextChatMsg(std::string server_ip, const TextChatMsgReq& req, const Json::Value& rtvalue);
+	AddFriendRsp NotifyAddFriend(std::string server_ip, const AddFriendReq& req); // å‘é€æ·»åŠ å¥½å‹è¯·æ±‚
+	AuthFriendRsp NotifyAuthFriend(std::string server_ip, const AuthFriendReq& req); // å‘é€éªŒè¯å¥½å‹è¯·æ±‚
+	bool GetBaseInfo(std::string base_key, int uid, std::shared_ptr<UserInfo>& userinfo); // è·å–ç”¨æˆ·åŸºæœ¬ä¿¡æ¯
+	TextChatMsgRsp NotifyTextChatMsg(std::string server_ip, const TextChatMsgReq& req, const Json::Value& rtvalue); // å‘é€æ–‡æœ¬æ¶ˆæ¯
 	KickUserRsp NotifyKickUser(std::string server_ip, const KickUserReq& req);
 private:
 	ChatGrpcClient();
-	unordered_map<std::string, std::unique_ptr<ChatConPool>> _pools;	
+	unordered_map<std::string, std::unique_ptr<ChatConPool>> _pools; //å­˜å‚¨è¿æ¥æ± çš„æ˜ å°„
 };
-
-
-

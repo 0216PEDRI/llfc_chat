@@ -9,7 +9,7 @@ namespace Ui {
 class ChatPage;
 }
 
-class ChatPage : public QWidget
+class ChatPage : public QWidget // 聊天页面
 {
     Q_OBJECT
 public:

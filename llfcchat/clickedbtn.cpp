@@ -4,7 +4,7 @@
 ClickedBtn::ClickedBtn(QWidget *parent):QPushButton (parent)
 {
     setCursor(Qt::PointingHandCursor); // 设置光标为小手
-    setFocusPolicy(Qt::NoFocus); // 让他不触发回车事件
+    setFocusPolicy(Qt::NoFocus); // 防止用户通过键盘操作（如回车键）来触发按钮点击事件
 }
 
 ClickedBtn::~ClickedBtn()

@@ -54,7 +54,7 @@ void SearchList::waitPending(bool pending)
 
 void SearchList::addTipItem()
 {
-    auto *invalid_item = new QWidget();
+    auto *invalid_item = new QWidget(); // 无效占位符项
     QListWidgetItem *item_tmp = new QListWidgetItem;
     //qDebug()<<"chat_user_wid sizeHint is " << chat_user_wid->sizeHint();
     item_tmp->setSizeHint(QSize(250,10));
@@ -63,8 +63,7 @@ void SearchList::addTipItem()
     this->setItemWidget(item_tmp, invalid_item);
     item_tmp->setFlags(item_tmp->flags() & ~Qt::ItemIsSelectable);
 
-
-    auto *add_user_item = new AddUserItem();
+    auto *add_user_item = new AddUserItem(); // 添加用户项
     QListWidgetItem *item = new QListWidgetItem;
     //qDebug()<<"chat_user_wid sizeHint is " << chat_user_wid->sizeHint();
     item->setSizeHint(add_user_item->sizeHint());

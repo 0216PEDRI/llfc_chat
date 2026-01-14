@@ -8,11 +8,24 @@ const RedisCli = new Redis({
   password: config_module.redis_passwd, // Redis密码
 });
 
-/**
- * 监听错误信息
- */
+// 在redis.js的RedisCli创建后，添加：
+RedisCli.on("connect", function () {
+  console.log("RedisCli 连接成功！"); // 连上了会输出这句话
+});
+
+// 监听错误信息
+// 优化后的错误监听（替换原来的代码）
 RedisCli.on("error", function (err) {
+  // 1. 打印自定义提示（你原来的）
   console.log("RedisCli connect error");
+  // 2. 打印具体错误原因（关键！比如密码错、连接超时）
+  console.log("具体错误详情：", err.message);
+  // 3. 打印实际使用的配置（确认密码/IP/端口是否传对）
+  console.log("当前Redis配置：", {
+    host: config_module.redis_host,
+    port: config_module.redis_port,
+    password: config_module.redis_passwd
+  });
   RedisCli.quit();
 });
 

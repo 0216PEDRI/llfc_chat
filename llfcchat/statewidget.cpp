@@ -8,8 +8,7 @@
 StateWidget::StateWidget(QWidget *parent): QWidget(parent),_curstate(ClickLbState::Normal)
 {
     setCursor(Qt::PointingHandCursor);
-    //添加红点
-    AddRedPoint();
+    AddRedPoint(); //添加红点
 }
 
 void StateWidget::SetState(QString normal, QString hover, QString press, QString select, QString select_hover, QString select_press)
@@ -56,18 +55,17 @@ void StateWidget::SetSelected(bool bselected)
     return;
 }
 
-
 void StateWidget::AddRedPoint()
 {
     //添加红点示意图
-    _red_point = new QLabel();
-    _red_point->setObjectName("red_point");
-    QVBoxLayout* layout2 = new QVBoxLayout;
-    _red_point->setAlignment(Qt::AlignCenter);
-    layout2->addWidget(_red_point);
-    layout2->setContentsMargins(0, 0, 0, 0);
-    this->setLayout(layout2);
-    _red_point->setVisible(false);
+    _red_point = new QLabel(); // 创建 QLabel 实例
+    _red_point->setObjectName("red_point"); // 设置对象名称
+    QVBoxLayout* layout2 = new QVBoxLayout;  // 创建垂直布局
+    _red_point->setAlignment(Qt::AlignCenter); // 设置红点对齐方式
+    layout2->addWidget(_red_point); // 将红点添加到布局中
+    layout2->setContentsMargins(0, 0, 0, 0); // 设置布局的边距
+    this->setLayout(layout2); // 设置布局到当前控件
+    _red_point->setVisible(false); // 设置红点初始不可见
 }
 
 void StateWidget::ShowRedPoint(bool show)
@@ -86,7 +84,7 @@ void StateWidget::paintEvent(QPaintEvent *event)
 
 void StateWidget::mousePressEvent(QMouseEvent *event)
 {
-    if (event->button() == Qt::LeftButton) {
+    if (event->button() == Qt::LeftButton) { // 控件已经是选中状态，再次点击不改变状态
         if(_curstate == ClickLbState::Selected){
             qDebug()<<"PressEvent , already to selected press: "<< _selected_press;
             //emit clicked();
@@ -95,7 +93,7 @@ void StateWidget::mousePressEvent(QMouseEvent *event)
             return;
         }
 
-        if(_curstate == ClickLbState::Normal){
+        if(_curstate == ClickLbState::Normal){ // 控件处于未选中状态,用户点击时，控件会切换到选中状态：
             qDebug()<<"PressEvent , change to selected press: "<< _selected_press;
             _curstate = ClickLbState::Selected;
             setProperty("state",_selected_press);

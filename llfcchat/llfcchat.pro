@@ -1,13 +1,13 @@
 QT       += core gui network
 
-greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
+greaterThan(QT_MAJOR_VERSION, 4): QT += widgets # 如果Qt版本大于4（即Qt 5及以上），则加入widgets模块
 
-TARGET = llfcchat
-TEMPLATE = app
+TARGET = llfcchat # 设置生成的可执行文件名为 llfcchat
+TEMPLATE = app # 指定项目模板为应用程序，表示生成一个可执行文件而非库
 RC_ICONS = icon.ico
-DESTDIR = ./bin
+DESTDIR = ./bin # 设置编译输出目录为 ./bin 文件夹
 DEFINES += QT_DEPRECATED_WARNINGS
-CONFIG += c++11
+CONFIG += c++11 # 启用C++11标准，支持C++11的新特性
 
 SOURCES += \
         adduseritem.cpp \

@@ -1,4 +1,4 @@
-﻿#include "LogicSystem.h"
+#include "LogicSystem.h"
 #include <csignal>
 #include <thread>
 #include <mutex>
@@ -8,6 +8,7 @@
 #include "RedisMgr.h"
 #include "ChatServiceImpl.h"
 #include "const.h"
+#include <Windows.h>
 
 using namespace std;
 bool bstop = false;
@@ -16,6 +17,7 @@ std::mutex mutex_quit;
 
 int main()
 {
+	SetConsoleOutputCP(CP_UTF8); // 设置控制台输出为 UTF - 8 编码
 	auto& cfg = ConfigMgr::Inst();
 	auto server_name = cfg["SelfServer"]["Name"];
 	try {
@@ -23,8 +25,8 @@ int main()
 		// 将当前服务器的登录数初始化为0（写入Redis）
 		RedisMgr::GetInstance()->HSet(LOGIN_COUNT, server_name, "0");
 		Defer derfer([server_name]() {
-			RedisMgr::GetInstance()->HDel(LOGIN_COUNT, server_name);
-			RedisMgr::GetInstance()->Close();
+			RedisMgr::GetInstance()->HDel(LOGIN_COUNT, server_name); //  删除redis中的登录计数
+			RedisMgr::GetInstance()->Close(); // 关闭redis链接
 		});
 
 		boost::asio::io_context  io_context;
@@ -42,6 +44,7 @@ int main()
 		// 监听端口和添加服务
 		builder.AddListeningPort(server_address, grpc::InsecureServerCredentials());
 		builder.RegisterService(&service);
+		
 		service.RegisterServer(pointer_server);
 		
 		// 构建并启动gRPC服务器
@@ -59,12 +62,12 @@ int main()
 			io_context.stop();
 			pool->Stop();
 			server->Shutdown();
-			});
+		});
 
 
 		//将Cserver注册给逻辑类方便以后清除连接
 		LogicSystem::GetInstance()->SetServer(pointer_server);
-		io_context.run();
+		io_context.run(); // 启动 Boost.Asio 的事件循环，处理异步事件。
 
 		grpc_server_thread.join();  // 等待gRPC线程退出
 		pointer_server->StopTimer(); // 停止TCP服务器的定时器

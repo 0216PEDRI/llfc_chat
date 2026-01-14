@@ -52,7 +52,7 @@ struct ApplyInfo {
     int _status;
 };
 
-struct AuthInfo {
+struct AuthInfo { // 请求中的认证信息
     AuthInfo(int uid, QString name,
              QString nick, QString icon, int sex):
         _uid(uid), _name(name), _nick(nick), _icon(icon),
@@ -64,7 +64,7 @@ struct AuthInfo {
     int _sex;
 };
 
-struct AuthRsp {
+struct AuthRsp { // 认证成功后的响应信息
     AuthRsp(int peer_uid, QString peer_name,
             QString peer_nick, QString peer_icon, int peer_sex)
         :_uid(peer_uid),_name(peer_name),_nick(peer_nick),
@@ -143,7 +143,7 @@ struct UserInfo {
     int _sex;
     QString _desc;
     QString _last_msg;
-    std::vector<std::shared_ptr<TextChatData>> _chat_msgs;
+    std::vector<std::shared_ptr<TextChatData>> _chat_msgs; // 保存用户聊天消息的容器
 };
 
 struct TextChatData{

@@ -4,7 +4,7 @@
 #include <QLabel>
 #include "global.h"
 
-class ClickedLabel: public QLabel
+class ClickedLabel: public QLabel // 带状态管理的可点击标签
 {
     Q_OBJECT
 public:

@@ -5,7 +5,7 @@
 #include "RedisMgr.h"
 #include "ConfigMgr.h"
 
-// ¹¹Ôìº¯ÊıÖĞ¼àÌı¶Ô·½Á¬½Ó
+// æ„é€ å‡½æ•°ä¸­ç›‘å¬å¯¹æ–¹è¿æ¥
 CServer::CServer(boost::asio::io_context& io_context, short port):_io_context(io_context), _port(port),
 _acceptor(io_context, tcp::endpoint(tcp::v4(),port)), _timer(_io_context, std::chrono::seconds(60))
 {
@@ -41,7 +41,7 @@ void CServer::ClearSession(std::string session_id) {
 	if (_sessions.find(session_id) != _sessions.end()) {
 		auto uid = _sessions[session_id]->GetUserId();
 
-		//ÒÆ³ıÓÃ»§ºÍsessionµÄ¹ØÁª
+		//ç§»é™¤ç”¨æˆ·å’Œsessionçš„å…³è”
 		UserMgr::GetInstance()->RmvUserSession(uid, session_id);
 	}
 
@@ -74,7 +74,7 @@ void CServer::on_timer(const boost::system::error_code& ec) {
 	}
 	std::vector<std::shared_ptr<CSession>> _expired_sessions;
 	int session_count = 0;
-	//´Ë´¦¼ÓËø±éÀúsession
+	//æ­¤å¤„åŠ é”éå†session
 	std::map<std::string, shared_ptr<CSession>> sessions_copy;
 	{
 		lock_guard<mutex> lock(_mutex);
@@ -85,27 +85,27 @@ void CServer::on_timer(const boost::system::error_code& ec) {
 	for (auto iter = sessions_copy.begin(); iter != sessions_copy.end(); iter++) {
 		auto b_expired = iter->second->IsHeartbeatExpired(now);
 		if (b_expired) {
-			//¹Ø±Õsocket, ÆäÊµÕâÀïÒ²»á´¥·¢async_readµÄ´íÎó´¦Àí
+			//å…³é—­socket, å…¶å®è¿™é‡Œä¹Ÿä¼šè§¦å‘async_readçš„é”™è¯¯å¤„ç†
 			iter->second->Close();
-			//ÊÕ¼¯¹ıÆÚĞÅÏ¢
+			//æ”¶é›†è¿‡æœŸä¿¡æ¯
 			_expired_sessions.push_back(iter->second);
 			continue;
 		}
 		session_count++;
 	}
 
-	//ÉèÖÃsessionÊıÁ¿
+	//è®¾ç½®sessionæ•°é‡
 	auto& cfg = ConfigMgr::Inst();
 	auto self_name = cfg["SelfServer"]["Name"];
 	auto count_str = std::to_string(session_count);
 	RedisMgr::GetInstance()->HSet(LOGIN_COUNT, self_name, count_str);
 
-	//´¦Àí¹ıÆÚsession, µ¥¶ÀÌá³ö£¬·ÀÖ¹ËÀËø
+	//å¤„ç†è¿‡æœŸsession, å•ç‹¬æå‡ºï¼Œé˜²æ­¢æ­»é”
 	for (auto &session : _expired_sessions) {
 		session->DealExceptionSession();
 	}
 	
-	//ÔÙ´ÎÉèÖÃ£¬ÏÂÒ»¸ö60s¼ì²â
+	//å†æ¬¡è®¾ç½®ï¼Œä¸‹ä¸€ä¸ª60sæ£€æµ‹
 	_timer.expires_after(std::chrono::seconds(60));
 	_timer.async_wait([this](boost::system::error_code ec) {
 		on_timer(ec);

@@ -1,15 +1,7 @@
-﻿#include "AsioIOServicePool.h"
+#include "AsioIOServicePool.h"
 #include <iostream>
 using namespace std;
 
-/**
- * @brief 构造函数，初始化 IO 服务池
- * @param size IO 服务（io_context）的数量，默认值可在声明处指定
- * @details
- * 1. 初始化 _ioServices 容器，创建指定数量的 io_context 对象
- * 2. 为每个 io_context 创建工作守卫（work guard），防止 io_context 因无待处理任务而退出事件循环
- * 3. 为每个 io_context 启动独立的工作线程，运行其事件循环（io_context::run()）
- */
 AsioIOServicePool::AsioIOServicePool(std::size_t size)
 	: _ioServices(size)          // 初始化 IO 服务容器，创建 `size` 个 io_context 对象
 	, _workGuards(size)          // 初始化工作守卫容器，预留 `size` 个位置

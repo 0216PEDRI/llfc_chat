@@ -128,7 +128,6 @@ void ApplyFriendPage::slot_auth_rsp(std::shared_ptr<AuthRsp> auth_rsp) {
     if (find_iter == _unauth_items.end()) {
         return;
     }
-
     find_iter->second->ShowAddBtn(false);
 }
 

@@ -18,7 +18,7 @@ ChatDialog::ChatDialog(QWidget *parent)
 
     ui->search_edit->SetMaxLength(15);
 
-    QAction *searchAction = new QAction(ui->search_edit);
+    QAction *searchAction = new QAction(ui->search_edit); // searchAction 表示一个搜索动作
     searchAction->setIcon(QIcon(":/res/search.png"));
     ui->search_edit->addAction(searchAction,QLineEdit::LeadingPosition);
     ui->search_edit->setPlaceholderText(QStringLiteral("搜索"));
@@ -59,7 +59,7 @@ ChatDialog::ChatDialog(QWidget *parent)
     ui->side_head_lb->setPixmap(scaledPixmap); // 将缩放后的图片设置到QLabel上
     ui->side_head_lb->setScaledContents(true); // 设置QLabel自动缩放图片内容以适应大小
 
-    ui->side_chat_lb->setProperty("state","normal");
+    ui->side_chat_lb->setProperty("state","normal"); // setProperty 是 QObject 类提供的一个方法
 
     ui->side_chat_lb->SetState("normal","hover","pressed","selected_normal","selected_hover","selected_pressed");
 
@@ -126,8 +126,6 @@ ChatDialog::ChatDialog(QWidget *parent)
     //连接对端消息通知
     connect(TcpMgr::GetInstance().get(), &TcpMgr::sig_text_chat_msg,
             this, &ChatDialog::slot_text_chat_msg);
-
-
 }
 
 
@@ -138,7 +136,6 @@ ChatDialog::~ChatDialog()
 
 void ChatDialog::addChatUserList()
 {
-
     //先按照好友列表加载聊天记录，等以后客户端实现聊天记录数据库之后再按照最后信息排序
     auto friend_list = UserMgr::GetInstance()->GetChatListPerPage();
     if (friend_list.empty() == false) {
@@ -161,6 +158,7 @@ void ChatDialog::addChatUserList()
         //更新已加载条目
         UserMgr::GetInstance()->UpdateChatLoadedCount();
     }
+
     // 创建QListWidgetItem，并设置自定义的widget
     for(int i = 0; i < 13; i++){
         int randomValue = QRandomGenerator::global()->bounded(100); // 生成0到99之间的随机整数
@@ -184,14 +182,14 @@ void ChatDialog::loadMoreChatUser() {
     if (friend_list.empty() == false) {
         for(auto & friend_ele : friend_list){
             auto find_iter = _chat_items_added.find(friend_ele->_uid);
-            if(find_iter != _chat_items_added.end()){
+            if(find_iter != _chat_items_added.end()){ // 已存在跳过
                 continue;
             }
             auto *chat_user_wid = new ChatUserWid();
             auto user_info = std::make_shared<UserInfo>(friend_ele);
             chat_user_wid->SetInfo(user_info);
             QListWidgetItem *item = new QListWidgetItem;
-            //qDebug()<<"chat_user_wid sizeHint is " << chat_user_wid->sizeHint();
+            // qDebug()<<"chat_user_wid sizeHint is " << chat_user_wid->sizeHint();
             item->setSizeHint(chat_user_wid->sizeHint());
             ui->chat_user_list->addItem(item);
             ui->chat_user_list->setItemWidget(item, chat_user_wid);
@@ -226,8 +224,8 @@ void ChatDialog::loadMoreConUser()
 
 bool ChatDialog::eventFilter(QObject *watched, QEvent *event)
 {
-    if (event->type() == QEvent::MouseButtonPress) {
-        QMouseEvent *mouseEvent = static_cast<QMouseEvent*>(event); // 转换为鼠标事件
+    if (event->type() == QEvent::MouseButtonPress) { // 是否为鼠标按下事件
+        QMouseEvent *mouseEvent = static_cast<QMouseEvent*>(event);
         handleGlobalMousePress(mouseEvent);
     }
     return QDialog::eventFilter(watched, event); // 基类的
@@ -252,17 +250,17 @@ void ChatDialog::handleGlobalMousePress(QMouseEvent *event)
 
 void ChatDialog::ShowSearch(bool bsearch)
 {
-    if(bsearch){
+    if(bsearch){ // 用户正在进行搜索操作
         ui->chat_user_list->hide();
         ui->con_user_list->hide();
         ui->search_list->show();
         _mode = ChatUIMode::SearchMode;
-    }else if(_state == ChatUIMode::ChatMode){
+    }else if(_state == ChatUIMode::ChatMode){ // 没有搜索且是聊天模式
         ui->chat_user_list->show();
         ui->con_user_list->hide();
         ui->search_list->hide();
         _mode = ChatUIMode::ChatMode;
-    }else if(_state == ChatUIMode::ContactMode){
+    }else if(_state == ChatUIMode::ContactMode){ // 没有搜索且是联系人模式
         ui->chat_user_list->hide();
         ui->search_list->hide();
         ui->con_user_list->show();
@@ -278,7 +276,7 @@ void ChatDialog::AddLBGroup(StateWidget *lb)
 // 加载更多聊天用户的槽函数
 void ChatDialog::slot_loading_chat_user()
 {
-    // 判断是否在_b_loading
+    // 判断是否有加载操作在运行中
     if(_b_loading){
         return;
     }

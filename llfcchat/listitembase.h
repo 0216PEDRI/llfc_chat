@@ -4,7 +4,7 @@
 #include <QWidget>
 #include "global.h"
 
-class ListItemBase : public QWidget
+class ListItemBase : public QWidget // 列表项基类
 {
     Q_OBJECT
 public:
@@ -14,7 +14,7 @@ public:
     ListItemType GetItemType();
 
 protected:
-    virtual void paintEvent(QPaintEvent *event) override;
+    virtual void paintEvent(QPaintEvent *event) override; // 重写paintEvent
 private:
     ListItemType _itemType;
 

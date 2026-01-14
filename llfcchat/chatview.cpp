@@ -44,7 +44,7 @@ ChatView::ChatView(QWidget *parent): QWidget(parent), isAppended(false)
     initStyleSheet();
 }
 
-void ChatView::appendChatItem(QWidget *item)
+void ChatView::appendChatItem(QWidget *item) // 添加条目到聊天背景
 {
     QVBoxLayout *vl = qobject_cast<QVBoxLayout *>(m_pScrollArea->widget()->layout());
     qDebug() << "vl->count() is " << vl->count();

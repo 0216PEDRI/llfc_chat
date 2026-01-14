@@ -48,7 +48,7 @@ public:
         icon_lb->setMaximumSize(QSize(45, 45));
         red_point = new QLabel(widget);
         red_point->setObjectName("red_point");
-        red_point->setGeometry(QRect(27, 2, 30, 30));
+        red_point->setGeometry(QRect(20, 0, 30, 30));
         red_point->setMinimumSize(QSize(30, 30));
         red_point->setMaximumSize(QSize(30, 30));
 

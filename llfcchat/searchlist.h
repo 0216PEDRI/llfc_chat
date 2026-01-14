@@ -18,9 +18,9 @@ class SearchList: public QListWidget
 public:
     SearchList(QWidget *parent = nullptr);
     void CloseFindDlg();
-    void SetSearchEdit(QWidget* edit);
+    void SetSearchEdit(QWidget* edit); // 设置一个搜索框控件
 protected:
-    bool eventFilter(QObject *watched, QEvent *event) override {
+    bool eventFilter(QObject *watched, QEvent *event) override { // 时间过滤器
         // 检查事件是否是鼠标悬浮进入或离开
         if (watched == this->viewport()) {
             if (event->type() == QEvent::Enter) {
@@ -47,7 +47,7 @@ protected:
         return QListWidget::eventFilter(watched, event);
     }
 private:
-    void waitPending(bool pending = true);
+    void waitPending(bool pending = true); // 等待某些操作完成
     bool _send_pending;
     void addTipItem();
     std::shared_ptr<QDialog> _find_dlg;

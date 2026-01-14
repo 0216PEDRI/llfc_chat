@@ -29,13 +29,13 @@ private:
     //已经创建好的标签
     QMap<QString, ClickedLabel*> _add_labels;
     std::vector<QString> _add_label_keys;
-    QPoint _label_point;
+    QPoint _label_point;  // 存储标签的当前坐标位置
     //用来在输入框显示添加新好友的标签
     QMap<QString, FriendLabel*> _friend_labels;
     std::vector<QString> _friend_label_keys;
     void addLabel(QString name);
     std::vector<QString> _tip_data;
-    QPoint _tip_cur_point;
+    QPoint _tip_cur_point; // 当前提示框坐标
     std::shared_ptr<SearchInfo> _si;
 public slots:
     //显示更多label标签

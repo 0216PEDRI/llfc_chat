@@ -7,7 +7,8 @@ UserMgr::~UserMgr()
 
 }
 
-void UserMgr::SetUserInfo(std::shared_ptr<UserInfo> user_info) {
+void UserMgr::SetUserInfo(std::shared_ptr<UserInfo> user_info)
+{
     _user_info = user_info;
 }
 
@@ -57,8 +58,7 @@ void UserMgr::AppendApplyList(QJsonArray array)
         auto sex = value["sex"].toInt();
         auto uid = value["uid"].toInt();
         auto status = value["status"].toInt();
-        auto info = std::make_shared<ApplyInfo>(uid, name,
-                                                desc, icon, nick, sex, status);
+        auto info = std::make_shared<ApplyInfo>(uid, name, desc, icon, nick, sex, status);
         _apply_list.push_back(info);
     }
 }
@@ -74,8 +74,7 @@ void UserMgr::AppendFriendList(QJsonArray array) {
         auto uid = value["uid"].toInt();
         auto back = value["back"].toString();
 
-        auto info = std::make_shared<FriendInfo>(uid, name,
-                                                 nick, icon, sex, desc, back);
+        auto info = std::make_shared<FriendInfo>(uid, name, nick, icon, sex, desc, back);
         _friend_list.push_back(info);
         _friend_map.insert(uid, info);
     }
@@ -249,5 +248,3 @@ void UserMgr::AppendFriendChatMsg(int friend_id,std::vector<std::shared_ptr<Text
 
     find_iter.value()->AppendChatMsgs(msgs);
 }
-
-

@@ -83,8 +83,8 @@
      <widget class="QLabel" name="red_point">
       <property name="geometry">
        <rect>
-        <x>27</x>
-        <y>2</y>
+        <x>20</x>
+        <y>0</y>
         <width>30</width>
         <height>30</height>
        </rect>

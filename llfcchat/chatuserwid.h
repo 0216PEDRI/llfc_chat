@@ -8,14 +8,14 @@ namespace Ui {
 class ChatUserWid;
 }
 
-class ChatUserWid : public ListItemBase
+class ChatUserWid : public ListItemBase // 单个聊天用户控件
 {
     Q_OBJECT
 
 public:
     explicit ChatUserWid(QWidget *parent = nullptr);
     ~ChatUserWid();
-    QSize sizeHint() const override;
+    QSize sizeHint() const override; // 返回控件的推荐大小
     void SetInfo(std::shared_ptr<UserInfo> user_info);
     void SetInfo(std::shared_ptr<FriendInfo> friend_info);
     void ShowRedPoint(bool bshow);

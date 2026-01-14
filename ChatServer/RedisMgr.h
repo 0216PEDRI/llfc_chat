@@ -21,15 +21,15 @@ public:
 
 			auto reply = (redisReply*)redisCommand(context, "AUTH %s", pwd);
 			if (reply->type == REDIS_REPLY_ERROR) {
-				std::cout << "ÈÏÖ¤Ê§°Ü" << std::endl;
-				//Ö´ĞĞ³É¹¦ ÊÍ·ÅredisCommandÖ´ĞĞºó·µ»ØµÄredisReplyËùÕ¼ÓÃµÄÄÚ´æ
+				std::cout << "è®¤è¯å¤±è´¥" << std::endl;
+				//æ‰§è¡ŒæˆåŠŸ é‡Šæ”¾redisCommandæ‰§è¡Œåè¿”å›çš„redisReplyæ‰€å ç”¨çš„å†…å­˜
 				freeReplyObject(reply);
 				continue;
 			}
 
-			//Ö´ĞĞ³É¹¦ ÊÍ·ÅredisCommandÖ´ĞĞºó·µ»ØµÄredisReplyËùÕ¼ÓÃµÄÄÚ´æ
+			//æ‰§è¡ŒæˆåŠŸ é‡Šæ”¾redisCommandæ‰§è¡Œåè¿”å›çš„redisReplyæ‰€å ç”¨çš„å†…å­˜
 			freeReplyObject(reply);
-			std::cout << "ÈÏÖ¤³É¹¦" << std::endl;
+			std::cout << "è®¤è¯æˆåŠŸ" << std::endl;
 			connections_.push(context);
 		}
 
@@ -41,7 +41,7 @@ public:
 					counter_ = 0;
 				}
 
-				std::this_thread::sleep_for(std::chrono::seconds(1)); // Ã¿¸ô 30 Ãë·¢ËÍÒ»´Î PING ÃüÁî
+				std::this_thread::sleep_for(std::chrono::seconds(1)); // æ¯éš” 30 ç§’å‘é€ä¸€æ¬¡ PING å‘½ä»¤
 			}	
 		});
 
@@ -68,7 +68,7 @@ public:
 			}
 			return !connections_.empty(); 
 			});
-		//Èç¹ûÍ£Ö¹ÔòÖ±½Ó·µ»Ø¿ÕÖ¸Õë
+		//å¦‚æœåœæ­¢åˆ™ç›´æ¥è¿”å›ç©ºæŒ‡é’ˆ
 		if (b_stop_) {
 			return  nullptr;
 		}
@@ -120,16 +120,16 @@ private:
 
 		auto reply = (redisReply*)redisCommand(context, "AUTH %s", pwd_);
 		if (reply->type == REDIS_REPLY_ERROR) {
-			std::cout << "ÈÏÖ¤Ê§°Ü" << std::endl;
-			//Ö´ĞĞ³É¹¦ ÊÍ·ÅredisCommandÖ´ĞĞºó·µ»ØµÄredisReplyËùÕ¼ÓÃµÄÄÚ´æ
+			std::cout << "è®¤è¯å¤±è´¥" << std::endl;
+			//æ‰§è¡ŒæˆåŠŸ é‡Šæ”¾redisCommandæ‰§è¡Œåè¿”å›çš„redisReplyæ‰€å ç”¨çš„å†…å­˜
 			freeReplyObject(reply);
 			redisFree(context);
 			return false;
 		}
 
-		//Ö´ĞĞ³É¹¦ ÊÍ·ÅredisCommandÖ´ĞĞºó·µ»ØµÄredisReplyËùÕ¼ÓÃµÄÄÚ´æ
+		//æ‰§è¡ŒæˆåŠŸ é‡Šæ”¾redisCommandæ‰§è¡Œåè¿”å›çš„redisReplyæ‰€å ç”¨çš„å†…å­˜
 		freeReplyObject(reply);
-		std::cout << "ÈÏÖ¤³É¹¦" << std::endl;
+		std::cout << "è®¤è¯æˆåŠŸ" << std::endl;
 		returnConnection(context);
 		return true;
 	}
@@ -137,7 +137,7 @@ private:
 	void checkThreadPro() {
 			size_t pool_size;
 			{
-				// ÏÈÄÃµ½µ±Ç°Á¬½ÓÊı
+				// å…ˆæ‹¿åˆ°å½“å‰è¿æ¥æ•°
 				std::lock_guard<std::mutex> lock(mutex_);
 				pool_size = connections_.size();
 			}
@@ -145,7 +145,7 @@ private:
 			
 			for (int i = 0; i < pool_size && !b_stop_; ++i) {
 				redisContext* ctx = nullptr;
-				// 1) È¡³öÒ»¸öÁ¬½Ó(³ÖÓĞËø)
+				// 1) å–å‡ºä¸€ä¸ªè¿æ¥(æŒæœ‰é”)
 				bool bsuccess = false;
 				auto * context = getConNonBlock();
 				if (context == nullptr) {
@@ -155,7 +155,7 @@ private:
 				redisReply* reply = nullptr;
 				try {
 					reply = (redisReply*)redisCommand(context, "PING");
-					// 2. ÏÈ¿´µ×²ã I/O£¯Ğ­Òé²ãÓĞÃ»ÓĞ´í
+					// 2. å…ˆçœ‹åº•å±‚ I/Oï¼åè®®å±‚æœ‰æ²¡æœ‰é”™
 					if (context->err) {
 						std::cout << "Connection error: " << context->err << std::endl;
 						if (reply) {
@@ -166,7 +166,7 @@ private:
 						continue;
 					}
 
-					// 3. ÔÙ¿´ Redis ×ÔÉí·µ»ØµÄÊÇ²»ÊÇ ERROR
+					// 3. å†çœ‹ Redis è‡ªèº«è¿”å›çš„æ˜¯ä¸æ˜¯ ERROR
 					if (!reply || reply->type == REDIS_REPLY_ERROR) {
 						std::cout << "reply is null, redis ping failed: " << std::endl;
 						if (reply) {
@@ -176,7 +176,7 @@ private:
 						fail_count_++;
 						continue;
 					}
-					// 4. Èç¹û¶¼Ã»ÎÊÌâ£¬Ôò»¹»ØÈ¥
+					// 4. å¦‚æœéƒ½æ²¡é—®é¢˜ï¼Œåˆ™è¿˜å›å»
 					//std::cout << "connection alive" << std::endl;
 					freeReplyObject(reply);
 					returnConnection(context);
@@ -192,14 +192,14 @@ private:
 							
 			}
 
-			//Ö´ĞĞÖØÁ¬²Ù×÷
+			//æ‰§è¡Œé‡è¿æ“ä½œ
 			while (fail_count_ > 0) {
 				auto res = reconnect();
 				if(res){
 					fail_count_--;
 				}
 				else {
-					//Áô¸øÏÂ´ÎÔÙÖØÊÔ
+					//ç•™ç»™ä¸‹æ¬¡å†é‡è¯•
 					break;
 				}
 			}
@@ -238,15 +238,15 @@ private:
 
 				auto reply = (redisReply*)redisCommand(context, "AUTH %s", pwd_);
 				if (reply->type == REDIS_REPLY_ERROR) {
-					std::cout << "ÈÏÖ¤Ê§°Ü" << std::endl;
-					//Ö´ĞĞ³É¹¦ ÊÍ·ÅredisCommandÖ´ĞĞºó·µ»ØµÄredisReplyËùÕ¼ÓÃµÄÄÚ´æ
+					std::cout << "è®¤è¯å¤±è´¥" << std::endl;
+					//æ‰§è¡ŒæˆåŠŸ é‡Šæ”¾redisCommandæ‰§è¡Œåè¿”å›çš„redisReplyæ‰€å ç”¨çš„å†…å­˜
 					freeReplyObject(reply);
 					continue;
 				}
 
-				//Ö´ĞĞ³É¹¦ ÊÍ·ÅredisCommandÖ´ĞĞºó·µ»ØµÄredisReplyËùÕ¼ÓÃµÄÄÚ´æ
+				//æ‰§è¡ŒæˆåŠŸ é‡Šæ”¾redisCommandæ‰§è¡Œåè¿”å›çš„redisReplyæ‰€å ç”¨çš„å†…å­˜
 				freeReplyObject(reply);
-				std::cout << "ÈÏÖ¤³É¹¦" << std::endl;
+				std::cout << "è®¤è¯æˆåŠŸ" << std::endl;
 				connections_.push(context);
 			}
 		}
@@ -282,20 +282,23 @@ public:
 	bool HDel(const std::string& key, const std::string& field);
 	bool Del(const std::string &key);
 	bool ExistsKey(const std::string &key);
+	
 	void Close() {
 		_con_pool->Close();
 		_con_pool->ClearConnections();
 	}
-
-	std::string acquireLock(const std::string& lockName,
-		int lockTimeout, int acquireTimeout);
-
-	bool releaseLock(const std::string& lockName,
-		const std::string& identifier);
-
+	// è·å–æŒ‡å®šé”åçš„é”ï¼Œæ”¯æŒè®¾ç½®é”çš„è¶…æ—¶æ—¶é—´å’Œè·å–é”çš„è¶…æ—¶æ—¶é—´
+	std::string acquireLock(const std::string& lockName, int lockTimeout, int acquireTimeout);
+	// é‡Šæ”¾æŒ‡å®šé”åçš„é”
+	bool releaseLock(const std::string& lockName, const std::string& identifier);
+	
+	// å¢åŠ æœåŠ¡å™¨è®¡æ•°
 	void IncreaseCount(std::string server_name);
+	// å‡å°‘æœåŠ¡å™¨è®¡æ•°
 	void DecreaseCount(std::string server_name);
+	// åˆå§‹åŒ–æœåŠ¡å™¨è®¡æ•°
 	void InitCount(std::string server_name);
+	// åˆ é™¤æœåŠ¡å™¨è®¡æ•°
 	void DelCount(std::string server_name);
 private:
 	RedisMgr();

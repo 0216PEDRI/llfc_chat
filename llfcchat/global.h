@@ -102,7 +102,7 @@ enum ChatUIMode{
     SettingsMode, //设置模式
 };
 
-//自定义QListWidgetItem的几种类型
+// 列表项类型
 enum ListItemType{
     CHAT_USER_ITEM, //聊天用户
     CONTACT_USER_ITEM, //联系人用户
@@ -122,24 +122,29 @@ const QString add_prefix = "添加标签 ";
 const int  tip_offset = 5;
 
 
-const std::vector<QString>  strs ={"hello world !",
-                                   "nice to meet u",
-                                   "New year，new life",
-                                   "You have to love yourself",
-                                   "My love is written in the wind ever since the whole world is you"};
+const std::vector<QString>  strs ={"你好",
+                                   "你在干嘛",
+                                   "你吃了吗",
+                                   "我在学习",
+                                   "晚上出去吃饭吗"};
 
 const std::vector<QString> heads = {
     ":/res/head_1.jpg",
     ":/res/head_2.jpg",
     ":/res/head_3.jpg",
     ":/res/head_4.jpg",
-    ":/res/head_5.jpg"
+    ":/res/head_5.jpg",
+    ":/res/head_6.jpg",
+    ":/res/head_7.jpg",
+    ":/res/head_wangruij.jpg",
+    ":/res/head_wangtianlei.jpg",
+    ":/res/head_zhangxi.jpg"
 };
 
 const std::vector<QString> names = {
-    "HanMeiMei",
-    "Lily",
-    "Ben",
+    "王天磊",
+    "王瑞",
+    "张曦",
     "Androw",
     "Max",
     "Summer",

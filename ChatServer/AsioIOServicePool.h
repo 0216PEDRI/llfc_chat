@@ -1,41 +1,38 @@
 #pragma once
 
-// ÀÏ°æ±¾ÖĞio_context½Ğ×öIOService
+// è€ç‰ˆæœ¬ä¸­io_contextå«åšIOService
 #include <vector> 
 #include <memory> 
 #include <thread>
 #include <boost/asio.hpp> 
 #include "Singleton.h" 
 
-/**
- * @brief Boost.AsioµÄIO·şÎñ³ØÊµÏÖ£¨µ¥ÀıÄ£Ê½£©
- * @details ¹ÜÀí¶à¸öio_contextÊµÀıºÍ¶ÔÓ¦µÄ¹¤×÷Ïß³Ì£¬ÊµÏÖÒì²½IO²Ù×÷µÄ¸ºÔØ¾ùºâ
- */
 class AsioIOServicePool : public Singleton<AsioIOServicePool>
 {
 	friend Singleton<AsioIOServicePool>; 
 public:
-	// 1. Èç¹ûio_contextÃ»ÓĞ°ó¶¨Òì²½µÄ¶ÁĞ´ÊÂ¼ş£¬runÆğÀ´Ö®ºó¾Í»áÁ¢¼´ÍË³ö£¬ËùÒÔÎÒÃÇĞèÒªWorkGuard 
-	// 2. io_contextÃ»ÓĞ¿½±´¹¹Ôì
+	// 1. å¦‚æœio_contextæ²¡æœ‰ç»‘å®šå¼‚æ­¥çš„è¯»å†™äº‹ä»¶ï¼Œrunèµ·æ¥ä¹‹åå°±ä¼šç«‹å³é€€å‡ºï¼Œæ‰€ä»¥æˆ‘ä»¬éœ€è¦WorkGuard 
+	// 2. io_contextæ²¡æœ‰æ‹·è´æ„é€ 
 	using IOService = boost::asio::io_context; 
-	using WorkGuard = boost::asio::executor_work_guard<IOService::executor_type>; // ¹¤×÷ÊØÎÀÀàĞÍ£¬ÓÃÓÚ·ÀÖ¹io_contextÍË³öÊÂ¼şÑ­»·
+	using WorkGuard = boost::asio::executor_work_guard<IOService::executor_type>; // å·¥ä½œå®ˆå«ç±»å‹ï¼Œç”¨äºé˜²æ­¢io_contexté€€å‡ºäº‹ä»¶å¾ªç¯
 	using WorkGuardPtr = std::unique_ptr<WorkGuard>;
 
-	~AsioIOServicePool();
-
-	// »ùÀàÃ»ÓĞ¿½±´¹¹ÔìºÍ¿½±´¸³Öµ£¬ËùÒÔ×ÓÀàÒ²Ã»ÓĞ£¬ÕâÁ½¾ä¿ÉĞ´¿É²»Ğ´
+	~AsioIOServicePool(); 
+	
+	// åŸºç±» Singleton<AsioIOServicePool> å·²ç»ç¦ç”¨äº†æ‹·è´æ„é€ å’Œæ‹·è´èµ‹å€¼ï¼Œ
+	// æ‰€ä»¥åœ¨å­ç±» AsioIOServicePool ä¸­ä¹Ÿä¸éœ€è¦é‡æ–°å®šä¹‰è¿™ä¸¤ä¸ªå‡½æ•°ã€‚
+	// ä½†æ˜¯ä¸ºäº†ä»£ç çš„æ˜ç¡®æ€§å’Œå¯ç»´æŠ¤æ€§ï¼Œå¯ä»¥æ˜¾å¼åœ°å†™ä¸Šè¿™ä¸¤å¥ã€‚
 	AsioIOServicePool(const AsioIOServicePool&) = delete;
 	AsioIOServicePool& operator= (const AsioIOServicePool&) = delete;
 
-	// Ê¹ÓÃ round-robin µÄ·½Ê½·µ»ØÒ»¸ö io_service
+	// ä½¿ç”¨ round-robin çš„æ–¹å¼è¿”å›ä¸€ä¸ª io_service
 	boost::asio::io_context& GetIOService();
 	void Stop();
 
 private:
-	// cpuÓĞ¼¸¸öºË¾Í·ÖÅä¶àÉÙ¸öÏß³Ì
-	explicit AsioIOServicePool(std::size_t size = 2/*std::thread::hardware_concurrency()*/); // Ä¬ÈÏÁ½¸öÏß³Ì
+	explicit AsioIOServicePool(std::size_t size = 2/*std::thread::hardware_concurrency()*/); // é»˜è®¤ä¸¤ä¸ªçº¿ç¨‹(cpuæœ‰å‡ ä¸ªæ ¸å°±åˆ†é…å¤šå°‘ä¸ªçº¿ç¨‹)
 	std::vector<IOService> _ioServices;
 	std::vector<WorkGuardPtr> _workGuards;
-	std::vector<std::thread> _threads; // ´æ´¢¹¤×÷Ïß³ÌµÄÈİÆ÷£¨Ã¿¸öÏß³ÌÔËĞĞÒ»¸öio_contextµÄrun()£©
-	std::size_t _nextIOService = 0;  // ÂÖÑ¯Ë÷Òı£¬¼ÇÂ¼ÏÂÒ»¸öÒª·ÖÅäµÄio_contextÔÚÈİÆ÷ÖĞµÄÎ»ÖÃ
+	std::vector<std::thread> _threads; // å­˜å‚¨å·¥ä½œçº¿ç¨‹çš„å®¹å™¨ï¼ˆæ¯ä¸ªçº¿ç¨‹è¿è¡Œä¸€ä¸ªio_contextçš„run()ï¼‰
+	std::size_t _nextIOService = 0;  // è½®è¯¢ç´¢å¼•ï¼Œè®°å½•ä¸‹ä¸€ä¸ªè¦åˆ†é…çš„io_contextåœ¨å®¹å™¨ä¸­çš„ä½ç½®
 };

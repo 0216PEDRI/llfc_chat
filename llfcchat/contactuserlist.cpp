@@ -41,7 +41,6 @@ void ContactUserList::ShowRedPoint(bool bshow /*= true*/)
 void ContactUserList::addContactUserList()
 {
     //获取好友列表
-
     auto * groupTip = new GroupTipItem();
     QListWidgetItem *item = new QListWidgetItem;
     item->setSizeHint(groupTip->sizeHint());
@@ -195,7 +194,7 @@ void ContactUserList::slot_item_clicked(QListWidgetItem *item)
 
         auto con_item = qobject_cast<ConUserItem*>(customItem);
         auto user_info = con_item->GetInfo();
-        //跳转到好友申请界面
+        //跳转到好友信息界面
         emit sig_switch_friend_info_page(user_info);
         return;
     }
@@ -254,5 +253,3 @@ void ContactUserList::slot_auth_rsp(std::shared_ptr<AuthRsp> auth_rsp)
     this->setItemWidget(item, con_user_wid);
 
 }
-
-

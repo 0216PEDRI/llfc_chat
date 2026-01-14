@@ -24,7 +24,7 @@ protected:
     void handleGlobalMousePress(QMouseEvent* event);
 private:
     void ShowSearch(bool bsearch = false);
-    void AddLBGroup(StateWidget* lb);
+    void AddLBGroup(StateWidget* lb); // 将 StateWidget 控件指针添加到 ChatDialog 类的控件列表 _lb_list 中
     void ClearLabelState(StateWidget *lb);
     Ui::ChatDialog *ui;
     ChatUIMode _mode;

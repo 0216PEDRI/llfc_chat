@@ -28,7 +28,6 @@ ChatPage::ChatPage(QWidget *parent) :
 
     // 连接输入框的回车发送信号
     connect(ui->chatEdit, &MessageTextEdit::send, this, &ChatPage::on_send_btn_clicked);
-
 }
 
 ChatPage::~ChatPage()
